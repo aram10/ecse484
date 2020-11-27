@@ -1,29 +1,25 @@
 import mtcnn
-import keras_vggface
 import matplotlib.pyplot as plt
-from mtcnn.mtcnn import MTCNN
+from mtcnn import MTCNN
 import cv2
 from PIL import Image
 import numpy as np
 import os
 
 #Folders for I/O
-input_folder = 'CHANGEME'
-output_folder = 'CHANGEME'
+input_folder = 'test'
+output_folder = 'output'
 
 # extract a single face from a given photograph
 def extract_face(pixels, required_size=(150, 150)):
     detector = MTCNN()
     results = detector.detect_faces(pixels)
-    if(len(results) > 0):
+    if len(results) > 0:
         x1, y1, width, height = results[0]['box']
         x2, y2 = x1 + width, y1 + height
         face = pixels[y1:y2, x1:x2]
-        if(len(face[0]) > 0):
-            image = Image.fromarray(face)
-            image = image.resize(required_size)
-            face_array = np.asarray(image)
-            return face_array
+        if len(face[0]) > 0:
+            return cv2.resize(face, required_size)
     return []
 
 def load_images_from_folder(folder):
@@ -43,7 +39,7 @@ for image in mask_images:
 counter = 0
 for image in output:
     name = 'img' + str(counter) + '.jpg'
-    temp = output_folder + name
+    temp = os.path.join(output_folder, name)
     if(len(image) > 0):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         cv2.imwrite(temp, np.array(image))
