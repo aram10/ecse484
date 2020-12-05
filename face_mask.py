@@ -1,23 +1,42 @@
 import os
 import os
+from os import DirEntry
 import zipfile
 import tensorflow as tf
 from tensorflow.python.keras.api._v1 import keras
 from tensorflow.python.keras.api._v1.keras import layers
 from tensorflow.python.keras.layers.core import Dropout
-from tensorflow.keras.optimizers import RMSprop
+from tensorflow.keras.optimizers import RMSprop, Adam
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 import json
 import time
 
-train_dir = os.path.abspath('../train')
+train_dir = os.path.abspath('../train-angled/train')
 validation_dir = os.path.abspath('../val')
 
 # Init model
 model = tf.keras.models.Sequential([
     tf.keras.layers.Conv2D(32, (3,3), activation='relu', input_shape=(150, 150, 1)),
     tf.keras.layers.MaxPooling2D(2, 2),
+    tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
+    tf.keras.layers.MaxPooling2D(2,2),
+    tf.keras.layers.Conv2D(128, (3,3), activation='relu'),
+    tf.keras.layers.MaxPooling2D(2,2),
+    tf.keras.layers.Conv2D(128, (3,3), activation='relu'),
+    tf.keras.layers.MaxPooling2D(2,2),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(512, activation='relu'),
+    tf.keras.layers.Dense(3, activation='softmax')
+])
+
+# Extra convolution layer
+model = tf.keras.models.Sequential([
+    tf.keras.layers.Conv2D(32, (5,5), activation='relu', input_shape=(150, 150, 1)),
+    tf.keras.layers.MaxPooling2D(2, 2),
+    tf.keras.layers.Conv2D(32, (3,3), activation='relu'),
+    tf.keras.layers.MaxPooling2D(2, 2),
+    tf.keras.layers.Dropout(0.2),
     tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2,2),
     tf.keras.layers.Conv2D(128, (3,3), activation='relu'),
@@ -49,6 +68,8 @@ train_generator = train_datagen.flow_from_directory(
         batch_size=20,
         color_mode='grayscale',
         class_mode='categorical')
+
+print(train_generator.class_indices)
     
 test_datagen = ImageDataGenerator(rescale=1./255)
 
